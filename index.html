@@ -179,6 +179,7 @@
       text-transform: uppercase;
       margin-bottom: 4px;
       position: relative; z-index: 1;
+      text-align: center;
     }
 
     .card-top-title {
@@ -187,6 +188,7 @@
       font-weight: 700;
       color: #fff;
       position: relative; z-index: 1;
+      text-align: center;
     }
 
     /* Form body */
@@ -671,7 +673,7 @@
             <option value="ม.3/341">ม.3/341</option>
             <option value="ม.4/144">ม.4/144</option>
             <option value="ม.5/154">ม.5/154</option>
-            <option value="ม.ถ">ม.ถ</option>
+            <option value="ม.5">ม.5</option>
           </select>
           <span class="select-caret">▼</span>
         </div>
@@ -726,7 +728,25 @@ async function searchData() {
     const text = await res.text();
     console.log("📊 Response:", text.substring(0, 200));
     
-    const rows = text.split('\n').map(r => r.split(',').map(c => c.replace(/^"(.*)"$/, '$1')));
+    // Parse CSV properly handling quoted fields with commas
+    const rows = text.split('\n').map(r => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < r.length; i++) {
+        const char = r[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.replace(/^"|"$/g, '').trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.replace(/^"|"$/g, '').trim());
+      return result;
+    });
     const data = rows.slice(1);
     console.log("📈 Data rows:", data.length, data);
 
@@ -803,7 +823,7 @@ async function searchData() {
           <div class="notice-icon-wrap">⚠️</div>
           <div class="notice-body">
             <div class="notice-label">หมายเหตุสำคัญ</div>
-            <p class="notice-text">นักเรียนที่ติด ร, มส หรือต้องการแก้ไขคะแนน ให้รีบติดต่อครูประจำวิชาภายในสัปดาห์นี้</p>
+            <p class="notice-text">นักเรียนที่ติด 0 หรือต้องการแก้ไขคะแนน ให้ดำเนินการส่งงานที่ยังไม่ส่งภายในวันที่ 8 มีนาคมไม่เกินเที่ยงคืน</p>
           </div>
         </div>
 
